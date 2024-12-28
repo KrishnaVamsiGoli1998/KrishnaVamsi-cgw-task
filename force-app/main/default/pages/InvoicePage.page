@@ -1,0 +1,91 @@
+<apex:page controller="CreateInvoiceController">
+    <h2>Invoice Wizard</h2>
+
+    <!-- Display URL Parameters -->
+    <table border="1">
+        <tr>
+            <th>Field Name</th>
+            <th>Value</th>
+        </tr>
+                
+        <tr rendered="{!NOT(ISBLANK(originRecord))}">
+            <td>account</td>
+            <td>{!accountId}</td>
+        </tr>
+        <tr rendered="{!NOT(ISBLANK(orderId))}">
+            <td>account number</td>
+            <td>{!accountId}</td>
+        </tr>
+        
+        <tr>
+            <td>Invoice Date</td>
+            <td>{!invoiceDate}</td>
+        </tr>
+        <tr>
+            <td>Invoice Due Date</td>
+            <td>{!invoiceDueDate}</td>
+        </tr>
+        <tr>
+            <td>Child Relationship Name</td>
+            <td>{!childRelationshipName}</td>
+        </tr>
+    </table>
+    <apex:outputPanel rendered="{!NOT(ISBLANK(originRecord))}">
+        <table border="1">
+            <tr>
+            <td>Origin Record (Opportunity)</td>
+            <td>{!originRecord}</td>
+        </tr>
+            </table>
+         </apex:outputPanel>
+    <apex:outputPanel rendered="{!NOT(ISBLANK(orderId))}">
+        <table border="1">
+            <tr >
+            <td>Origin Record (Order)</td>
+            <td>{!orderId}</td>
+        </tr>
+            </table>
+        </apex:outputPanel>
+
+    <h3>Line Items</h3>
+    <apex:outputPanel rendered="{!NOT(ISBLANK(originRecord))}">
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            <apex:repeat value="{!lineItems}" var="lineItem">
+                <tr>
+                    <td>{!lineItem.Description}</td>
+                    <td>{!lineItem.Quantity}</td>
+                    <td>{!lineItem.UnitPrice}</td>
+                </tr>
+            </apex:repeat>
+        </tbody>
+    </table>
+       </apex:outputPanel>
+    <apex:outputPanel rendered="{!NOT(ISBLANK(orderId))}">
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            <apex:repeat value="{!orderItems}" var="orderItem">
+                <tr>
+                    <td>{!orderItem.Description}</td>
+                    <td>{!orderItem.Quantity}</td>
+                    <td>{!orderItem.UnitPrice}</td>
+                </tr>
+            </apex:repeat>
+        </tbody>
+    </table>
+    </apex:outputPanel>
+</apex:page>

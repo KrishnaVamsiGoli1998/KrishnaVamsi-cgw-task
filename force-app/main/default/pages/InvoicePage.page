@@ -1,7 +1,7 @@
 <apex:page controller="CreateInvoiceController">
     <h2>Invoice Wizard</h2>
 
-    <!-- Display URL Parameters -->
+    
     <table border="1">
         <tr>
             <th>Field Name</th>

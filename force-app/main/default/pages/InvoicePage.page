@@ -1,22 +1,13 @@
 <apex:page controller="CreateInvoiceController">
     <h2>Invoice Wizard</h2>
 
-    
+   
     <table border="1">
         <tr>
             <th>Field Name</th>
             <th>Value</th>
         </tr>
-                
-        <tr rendered="{!NOT(ISBLANK(originRecord))}">
-            <td>account</td>
-            <td>{!accountId}</td>
-        </tr>
-        <tr rendered="{!NOT(ISBLANK(orderId))}">
-            <td>account number</td>
-            <td>{!accountId}</td>
-        </tr>
-        
+                 
         <tr>
             <td>Invoice Date</td>
             <td>{!invoiceDate}</td>
@@ -36,6 +27,10 @@
             <td>Origin Record (Opportunity)</td>
             <td>{!originRecord}</td>
         </tr>
+            <tr >
+            <td>account</td>
+            <td>{!accountId}</td>
+        </tr>
             </table>
          </apex:outputPanel>
     <apex:outputPanel rendered="{!NOT(ISBLANK(orderId))}">
@@ -43,6 +38,10 @@
             <tr >
             <td>Origin Record (Order)</td>
             <td>{!orderId}</td>
+        </tr>
+            <tr >
+            <td>account number</td>
+            <td>{!accountId}</td>
         </tr>
             </table>
         </apex:outputPanel>

@@ -1,7 +1,9 @@
 <apex:page controller="CreateInvoiceController">
+    
+    
     <h2>Invoice Wizard</h2>
 
-   
+    
     <table border="1">
         <tr>
             <th>Field Name</th>
@@ -87,4 +89,20 @@
         </tbody>
     </table>
     </apex:outputPanel>
+    
+    <div style="margin-top: 20px;"></div>
+    
+    <apex:form>
+        <apex:commandButton value="Show JSON" action="{!generateJson}" rerender="jsonOutput"/>
+    </apex:form>
+
+	<div style="margin-top: 20px;"></div>
+    
+    <apex:outputPanel id="jsonOutput">
+        <pre style="background-color: #f8f9fa; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: monospace;">
+            <apex:outputText value="{!invoiceJson}" escape="false"/>
+        </pre>
+    </apex:outputPanel>
+    
+    
 </apex:page>

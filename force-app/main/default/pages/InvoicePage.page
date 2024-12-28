@@ -1,15 +1,12 @@
-<apex:page controller="CreateInvoiceController">
-    
+<apex:page controller="CreateInvoiceController">    
     
     <h2>Invoice Wizard</h2>
-
     
     <table border="1">
         <tr>
             <th>Field Name</th>
             <th>Value</th>
-        </tr>
-                 
+        </tr>                 
         <tr>
             <td>Invoice Date</td>
             <td>{!invoiceDate}</td>
@@ -42,8 +39,8 @@
             <td>{!orderId}</td>
         </tr>
             <tr >
-            <td>account number</td>
-            <td>{!accountId}</td>
+            <td>account</td>
+            <td>{!accountIdFinal}</td>
         </tr>
             </table>
         </apex:outputPanel>
@@ -93,13 +90,15 @@
     <div style="margin-top: 20px;"></div>
     
     <apex:form>
+        <apex:commandButton value="Proceed to create Invoice" action="{!createInvoice}" rerender="jsonOutput"/>
+        <div style="margin-top: 20px;"></div>
         <apex:commandButton value="Show JSON" action="{!generateJson}" rerender="jsonOutput"/>
     </apex:form>
 
 	<div style="margin-top: 20px;"></div>
     
     <apex:outputPanel id="jsonOutput">
-        <pre style="background-color: #f8f9fa; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: monospace;">
+        <pre>
             <apex:outputText value="{!invoiceJson}" escape="false"/>
         </pre>
     </apex:outputPanel>

@@ -1,7 +1,7 @@
 <apex:page controller="CreateInvoiceController">    
-    
+
     <h2>Invoice Wizard</h2>
-    
+
     <table border="1">
         <tr>
             <th>Field Name</th>
@@ -20,88 +20,92 @@
             <td>{!childRelationshipName}</td>
         </tr>
     </table>
+
     <apex:outputPanel rendered="{!NOT(ISBLANK(originRecord))}">
         <table border="1">
             <tr>
-            <td>Origin Record (Opportunity)</td>
-            <td>{!originRecord}</td>
-        </tr>
-            <tr >
-            <td>account</td>
-            <td>{!accountId}</td>
-        </tr>
-            </table>
-         </apex:outputPanel>
+                <td>Origin Record (Opportunity)</td>
+                <td>{!originRecord}</td>
+            </tr>
+            <tr>
+                <td>Account</td>
+                <td>{!accountId}</td>
+            </tr>
+        </table>
+    </apex:outputPanel>
+
     <apex:outputPanel rendered="{!NOT(ISBLANK(orderId))}">
         <table border="1">
-            <tr >
-            <td>Origin Record (Order)</td>
-            <td>{!orderId}</td>
-        </tr>
-            <tr >
-            <td>account</td>
-            <td>{!accountIdFinal}</td>
-        </tr>
-            </table>
-        </apex:outputPanel>
+            <tr>
+                <td>Origin Record (Order)</td>
+                <td>{!orderId}</td>
+            </tr>
+            <tr>
+                <td>Account</td>
+                <td>{!accountIdFinal}</td>
+            </tr>
+        </table>
+    </apex:outputPanel>
 
     <h3>Line Items</h3>
-    <apex:outputPanel rendered="{!NOT(ISBLANK(originRecord))}">
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Description</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-            </tr>
-        </thead>
-        <tbody>
-            <apex:repeat value="{!lineItems}" var="lineItem">
-                <tr>
-                    <td>{!lineItem.Description}</td>
-                    <td>{!lineItem.Quantity}</td>
-                    <td>{!lineItem.UnitPrice}</td>
-                </tr>
-            </apex:repeat>
-        </tbody>
-    </table>
-       </apex:outputPanel>
-    <apex:outputPanel rendered="{!NOT(ISBLANK(orderId))}">
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Description</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-            </tr>
-        </thead>
-        <tbody>
-            <apex:repeat value="{!orderItems}" var="orderItem">
-                <tr>
-                    <td>{!orderItem.Description}</td>
-                    <td>{!orderItem.Quantity}</td>
-                    <td>{!orderItem.UnitPrice}</td>
-                </tr>
-            </apex:repeat>
-        </tbody>
-    </table>
-    </apex:outputPanel>
-    
-    <div style="margin-top: 20px;"></div>
-    
-    <apex:form>
-        <apex:commandButton value="Proceed to create Invoice" action="{!createInvoice}" rerender="jsonOutput"/>
-        <div style="margin-top: 20px;"></div>
-        <apex:commandButton value="Show JSON" action="{!generateJson}" rerender="jsonOutput"/>
-    </apex:form>
 
-	<div style="margin-top: 20px;"></div>
-    
+    <apex:outputPanel rendered="{!NOT(ISBLANK(originRecord))}">
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <apex:repeat value="{!lineItems}" var="lineItem">
+                    <tr>
+                        <td>{!lineItem.Description}</td>
+                        <td>{!lineItem.Quantity}</td>
+                        <td>{!lineItem.UnitPrice}</td>
+                    </tr>
+                </apex:repeat>
+            </tbody>
+        </table>
+    </apex:outputPanel>
+
+    <apex:outputPanel rendered="{!NOT(ISBLANK(orderId))}">
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <apex:repeat value="{!orderItems}" var="orderItem">
+                    <tr>
+                        <td>{!orderItem.Description}</td>
+                        <td>{!orderItem.Quantity}</td>
+                        <td>{!orderItem.UnitPrice}</td>
+                    </tr>
+                </apex:repeat>
+            </tbody>
+        </table>
+    </apex:outputPanel>
+
+    <div style="margin-top: 20px;"></div>
+
+    <div style="margin-top: 20px;">
+    	<apex:form >
+        	<apex:commandButton value="Show JSON" action="{!generateJson}" styleClass="action-button" />
+        	<apex:commandButton value="Proceed to Create Invoice" action="{!createInvoice}" styleClass="action-button primary-button" />
+    	</apex:form>
+	</div>
+
+    <div style="margin-top: 20px;"></div>
+
     <apex:outputPanel id="jsonOutput">
         <pre>
-            <apex:outputText value="{!invoiceJson}" escape="false"/>
+            <apex:outputText value="{!invoiceJson}" escape="false" />
         </pre>
     </apex:outputPanel>
-    
-    
+
 </apex:page>

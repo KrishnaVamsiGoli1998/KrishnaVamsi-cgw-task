@@ -16,5 +16,5 @@
     <protected>false</protected>
     <showsLocation>false</showsLocation>
     <showsStatus>false</showsStatus>
-    <url>/apex/InvoicePage?order_id={!Order.Id}&amp;account={!Order.AccountNumber}&amp;invoice_date={!Order.CreatedDate}&amp;invoice_due_date={!Order.EffectiveDate}&amp;child_relationship_name=OrderItem</url>
+    <url>/apex/InvoicePage?order_id={!Order.Id}&amp;account={!Order.AccountNumber}&amp;invoice_date={!Order.CreatedDate}&amp;invoice_due_date={!Order.EffectiveDate}&amp;child_relationship_name=OrderItem&amp;line_item_description=Description&amp;line_item_quantity=Quantity&amp;line_item_unit_price=UnitPrice</url>
 </WebLink>

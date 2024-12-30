@@ -1,157 +1,127 @@
-public class CreateInvoiceController {
-
+public with sharing class CreateInvoiceController {
     public String accountId { get; set; }
     public String accountIdFinal { get; set; }
-    public String lineItemDescription { get; set; }
-    public String childRelationshipName { get; set; }
-    public Decimal lineItemQuantity { get; set; }
-    public Decimal lineItemUnitPrice { get; set; }
-    public String invoiceDate { get; set; }
-    public String invoiceDueDate { get; set; }
     public String originRecord { get; set; }
     public String orderId { get; set; }
-    public List<OpportunityLineItem> lineItems { get; set; }
-    public List<Line_Item__c> lineItemsToInsert { get; set; }
+    public String invoiceDate { get; set; }
+    public String invoiceDueDate { get; set; }
+    public String childRelationshipName { get; set; }
+    public String lineItemDescription { get; set; }
+    public String lineItemQuantity { get; set; }
+    public String lineItemUnitPrice { get; set; }
+    public List<OpportunityLineItem> opportunityLineItems { get; set; }
     public List<OrderItem> orderItems { get; set; }
-    public Boolean isOpportunity { get; set; }
-    public Boolean isOrder { get; set; }
     public String invoiceJson { get; set; }
 
+
     public CreateInvoiceController() {
+        
         accountId = ApexPages.currentPage().getParameters().get('account');
-        lineItemDescription = ApexPages.currentPage().getParameters().get('line_item_description');
         invoiceDate = ApexPages.currentPage().getParameters().get('invoice_date');
         invoiceDueDate = ApexPages.currentPage().getParameters().get('invoice_due_date');
         originRecord = ApexPages.currentPage().getParameters().get('origin_record');
         orderId = ApexPages.currentPage().getParameters().get('order_id');
         childRelationshipName = ApexPages.currentPage().getParameters().get('child_relationship_name');
+        lineItemDescription = ApexPages.currentPage().getParameters().get('line_item_description');
+        lineItemQuantity = ApexPages.currentPage().getParameters().get('line_item_quantity');
+        lineItemUnitPrice = ApexPages.currentPage().getParameters().get('line_item_unit_price');
         
-        System.debug('Child Quantity: '+ApexPages.currentPage().getParameters().get('line_qty'));
+        opportunityLineItems = new List<OpportunityLineItem>();
+        orderItems = new List<OrderItem>();
 
-        System.debug('Child Relationship Name: ' + childRelationshipName);
-
+        // Fetch the line items dynamically based on the passed parameters
         if (originRecord != null) {
-            isOpportunity = true;
-            isOrder = false;
-            lineItems = [SELECT Description, Quantity, UnitPrice FROM OpportunityLineItem WHERE OpportunityId = :originRecord];
-        }
 
-        if (orderId != null) {
-            isOrder = true;
-            isOpportunity = false;
+            List<SObject> sObjectList = queryLineItems('Opportunity', originRecord); 
+            // Type-casting the generic SObject list to OpportunityLineItem list
+            for (SObject obj : sObjectList) {
+                opportunityLineItems.add((OpportunityLineItem) obj); // Type-casting
+            }
+        } else if (orderId != null) {
+
+            List<SObject> sObjectList = queryLineItems('Order', orderId); 
             accountIdFinal = [SELECT Id FROM Account WHERE AccountNumber = :accountId].Id;
-            orderItems = [SELECT Description, Quantity, UnitPrice FROM OrderItem WHERE OrderId = :orderId];
+            // Type-casting the generic SObject list to OrderItem list
+            for (SObject obj : sObjectList) {
+                orderItems.add((OrderItem) obj); // Type-casting
+            }
         }
     }
 
-    public void generateJson() {
-        System.debug('Debug: Entered generateJson method.');
+    // Dynamic SOQL query to fetch line items
+    private List<SObject> queryLineItems(String parentObject, String recordId) {
+        String query = 'SELECT ' + lineItemDescription + ', ' + lineItemQuantity + ', ' + lineItemUnitPrice + 
+                       ' FROM ' + childRelationshipName +
+                       ' WHERE ' + parentObject + 'Id = :recordId';
+        return Database.query(query);
+    }
 
+    public void generateJson() {
         Map<String, Object> invoice = new Map<String, Object>();
         invoice.put('Type', 'ACCREC');
         invoice.put('Contact', new Map<String, Object>{ 'ContactID' => '0000000' });
-        invoice.put('Date', invoiceDate != null ? invoiceDate : '');
-        invoice.put('DueDate', invoiceDueDate != null ? invoiceDueDate : '');
-
-        System.debug('Debug: Basic invoice setup completed.');
+        invoice.put('Date', invoiceDate);
+        invoice.put('DueDate', invoiceDueDate);
 
         List<Map<String, Object>> invoiceLineItems = new List<Map<String, Object>>();
-
-        if (isOpportunity && lineItems != null) {
-            for (OpportunityLineItem lineItem : lineItems) {
-                invoiceLineItems.add(new Map<String, Object>{
-                    'Description' => lineItem.Description != null ? lineItem.Description : '',
-                    'Quantity' => lineItem.Quantity != null ? lineItem.Quantity : 0,
-                    'UnitAmount' => lineItem.UnitPrice != null ? lineItem.UnitPrice : 0,
-                    'AccountCode' => '200'
-                });
-            }
+        
+        // Adding OpportunityLineItems to the JSON
+        for (OpportunityLineItem lineItem : opportunityLineItems) {
+            invoiceLineItems.add(new Map<String, Object> {
+                'Description' => lineItem.Description,
+                'Quantity' => lineItem.Quantity,
+                'UnitAmount' => lineItem.UnitPrice,
+                'AccountCode' => '200'
+            });
         }
 
-        if (isOrder && orderItems != null) {
-            for (OrderItem orderItem : orderItems) {
-                invoiceLineItems.add(new Map<String, Object>{
-                    'Description' => orderItem.Description != null ? orderItem.Description : '',
-                    'Quantity' => orderItem.Quantity != null ? orderItem.Quantity : 0,
-                    'UnitAmount' => orderItem.UnitPrice != null ? orderItem.UnitPrice : 0,
-                    'AccountCode' => '200'
-                });
-            }
+        // Adding OrderItems to the JSON
+        for (OrderItem lineItem : orderItems) {
+            invoiceLineItems.add(new Map<String, Object> {
+                'Description' => lineItem.Description,
+                'Quantity' => lineItem.Quantity,
+                'UnitAmount' => lineItem.UnitPrice,
+                'AccountCode' => '200'
+            });
         }
 
-        System.debug('Debug: Invoice LineItems setup completed.');
         invoice.put('LineItems', invoiceLineItems);
-
         invoiceJson = JSON.serializePretty(invoice);
-
-        System.debug('Debug: Generated JSON: ' + invoiceJson);
     }
 
     public PageReference createInvoice() {
         Invoice__c newInvoice = new Invoice__c();
-
-        if (isOpportunity) {
+        if (originRecord != null){
             newInvoice.Account__c = accountId;
-        } else if (isOrder) {
+        } else if (orderId != null) {
             newInvoice.Account__c = accountIdFinal;
-        }
-
-        if (invoiceDate != null) {
-            try {
-                if (invoiceDate.contains('/')) {
-                    List<String> dateParts = invoiceDate.split('/');
-                    String formattedDate = dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0];
-                    newInvoice.Invoice_Date__c = Date.valueOf(formattedDate);
-                } else {
-                    newInvoice.Invoice_Date__c = Date.valueOf(invoiceDate);
-                }
-            } catch (Exception e) {
-                newInvoice.Invoice_Date__c = Date.today();
-            }
-        } else {
-            newInvoice.Invoice_Date__c = Date.today();
-        }
-
-        if (invoiceDueDate != null) {
-            try {
-                if (invoiceDueDate.contains('/')) {
-                    List<String> dateParts = invoiceDueDate.split('/');
-                    String formattedDate = dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0];
-                    newInvoice.Due_Date__c = Date.valueOf(formattedDate);
-                } else {
-                    newInvoice.Due_Date__c = Date.valueOf(invoiceDueDate);
-                }
-            } catch (Exception e) {
-                newInvoice.Due_Date__c = Date.today().addDays(30);
-            }
-        } else {
-            newInvoice.Due_Date__c = Date.today().addDays(30);
-        }
+        }       
+            
+        newInvoice.Invoice_Date__c = parseDate(invoiceDate);
+        newInvoice.Due_Date__c = parseDate(invoiceDueDate);
 
         insert newInvoice;
 
         List<Line_Item__c> lineItemsToInsert = new List<Line_Item__c>();
 
-        if (isOpportunity && lineItems != null) {
-            for (OpportunityLineItem lineItem : lineItems) {
-                lineItemsToInsert.add(new Line_Item__c(
-                    Invoice__c = newInvoice.Id,
-                    Line_Description__c = lineItem.Description,
-                    Quantity__c = lineItem.Quantity,
-                    Unit_Price__c = lineItem.UnitPrice
-                ));
-            }
+        // Inserting OpportunityLineItems
+        for (OpportunityLineItem lineItem : opportunityLineItems) {
+            lineItemsToInsert.add(new Line_Item__c(
+                Invoice__c = newInvoice.Id,
+                Line_Description__c = lineItem.Description,
+                Quantity__c = lineItem.Quantity,
+                Unit_Price__c = lineItem.UnitPrice
+            ));
         }
 
-        if (isOrder && orderItems != null) {
-            for (OrderItem orderItem : orderItems) {
-                lineItemsToInsert.add(new Line_Item__c(
-                    Invoice__c = newInvoice.Id,
-                    Line_Description__c = orderItem.Description,
-                    Quantity__c = orderItem.Quantity,
-                    Unit_Price__c = orderItem.UnitPrice
-                ));
-            }
+        // Inserting OrderItems
+        for (OrderItem lineItem : orderItems) {
+            lineItemsToInsert.add(new Line_Item__c(
+                Invoice__c = newInvoice.Id,
+                Line_Description__c = lineItem.Description,
+                Quantity__c = lineItem.Quantity,
+                Unit_Price__c = lineItem.UnitPrice
+            ));
         }
 
         if (!lineItemsToInsert.isEmpty()) {
@@ -161,5 +131,13 @@ public class CreateInvoiceController {
         PageReference invoicePage = new PageReference('/' + newInvoice.Id);
         invoicePage.setRedirect(true);
         return invoicePage;
+    }
+
+    private Date parseDate(String dateString) {
+        try {
+            return Date.valueOf(dateString);
+        } catch (Exception e) {
+            return Date.today();
+        }
     }
 }
